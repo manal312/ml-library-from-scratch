@@ -1,11 +1,4 @@
 #include "base.h"
-#include <stdint.h>
-
-typedef uint64_t u64;
-typedef uint32_t u32;
-typedef int32_t b32;
-typedef void* ptr;
-
 #define ARENA_BASE_POS (sizeof(mem_arena))
 #define ARENA_ALIGN (sizeof(void*))
 

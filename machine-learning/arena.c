@@ -1,3 +1,4 @@
+#include "arena.h"
 
 //1.Arena Creation & Destruction (till line 26) 
 mem_arena* arena_create(u64 reserve_size, u64 commit_size) {
