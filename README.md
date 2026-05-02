@@ -16,14 +16,14 @@ This project demonstrates matrix operations, model building, and training on the
 ---
 
 ## 📂 Project Structure
-
+```bash
 ml-library-from-scratch/
 └── machine-learning/
     ├── src/               C source files
     ├── include/           C header files
     ├── mnist.py           Python script for dataset prep
     └── build.bat          Windows build script
-
+``` 
 ---
 
 ## ⚡ Getting Started
