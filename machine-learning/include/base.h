@@ -1,3 +1,5 @@
+#ifndef BASE_H
+#define BASE_H
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -25,4 +27,6 @@ typedef float f32;
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define ALIGN_UP_POW2(n, p) (((u64)(n) + ((u64)(p) - 1)) & (~((u64)(p) - 1)))
+
+#endif
 
