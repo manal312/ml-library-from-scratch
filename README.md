@@ -16,12 +16,13 @@ This project demonstrates matrix operations, model building, and training on the
 ---
 
 ## 📂 Project Structure
-machine-learning/
-├── src/               # C source files
-├── include/           # C header files
-├── data/              # MNIST dataset files (.mat)
-├── mnist.py           # Python script to download/preprocess MNIST
-└── build.bat          # Windows build script
+
+ml-library-from-scratch/
+└── machine-learning/
+    ├── src/               C source files
+    ├── include/           C header files
+    ├── mnist.py           Python script for dataset prep
+    └── build.bat          Windows build script
 
 ---
 
