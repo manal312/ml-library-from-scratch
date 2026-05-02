@@ -1,4 +1,6 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "arena.h"
+#include "prng.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +12,9 @@ typedef struct {
 } matrix;
 
 matrix* mat_create(mem_arena* arena, u32 rows, u32 cols);
-void mat_clear(matrix* mat);
+matrix* mat_load(mem_arena* arena, u32 rows, u32 cols, const char* filename);
 b32 mat_copy(matrix* dest, matrix* src);
+void mat_clear(matrix* mat);
 void mat_fill(matrix* mat, f32 value);
 void mat_scale(matrix* mat, f32 scale);
 f32 mat_sum(matrix* mat);
@@ -21,30 +24,56 @@ b32 mat_mul(
     matrix* out, const matrix* a, const matrix* b,
     b8 zero_out, b8 transpose_a, b8 transpose_b
 );
- b32 mat_relu(matrix* out, matrix* in);
- b32 mat_softmax(matrix* out, matrix* in);
+ b32 mat_relu(matrix* out, const matrix* in);
+ b32 mat_softmax(matrix* out, const matrix* in);
  b32 mat_cross_entropy_loss(matrix* out, const matrix* p, const matrix* q);
  b32 mat_relu_add_grad( matrix* out, const matrix* in);
  b32 mat_softmaxx_add_grad(matrix* out, const matrix* softmax_out);
  b32 mat_cross_entropy_add_grad(matrix* out, const matrix* p, const matrix* q);
 
+ void draw_mnist_digit(f32*data);
 
 int main(void) {
+
+    printf("Program started!\n");
+    printf("Before arena_create\n");
+    mem_arena* perm_arena = arena_create(MiB(100), MiB(10));
+    printf("After arena_create\n");
+
     
-    mem_arena* perm_arena = arena_create(GiB(10), MiB(1));   
-    
-    while (1)
-    {
-        printf("allocating 16 MiB...\n");
-        arena_push(perm_arena, MiB(16), false);
-        getc(stdin);
+    matrix* train_images = mat_load(perm_arena, 60000, 784, "train_images.mat");
+    matrix* test_images = mat_load(perm_arena, 10000, 784, "test_images.mat");
+
+    if (!train_images) {
+        printf("Failed to load train_images.mat\n");
+        return 1;
     }
     
-       
+    printf("train_images: Loaded %u rows, %u cols\n", train_images->rows, train_images->cols);
+
+    if (!test_images) {
+        printf("Failed to load test_images.mat\n");
+        return 1;
+    }
+    printf("test_images: Loaded %u rows, %u cols\n", test_images->rows, test_images->cols);
+
+    draw_mnist_digit(test_images->data );
     
     arena_destroy(perm_arena);
 
     return 0;
+}
+
+void draw_mnist_digit(f32* data) {
+    for (u32 y = 0; y < 28; y++) {
+        for (u32 x = 0; x < 28; x++) {
+            f32 num = data[x + y * 28];
+            u32 col = 232 + (u32)(num * 24);
+            printf("\x1b[48;5;%dm  ", col);
+        }
+        printf("\n");
+    }
+    printf("\x1b[0m");
 }
 
 matrix* mat_create(mem_arena* arena, u32 rows, u32 cols){
@@ -53,10 +82,28 @@ matrix* mat_create(mem_arena* arena, u32 rows, u32 cols){
     mat->cols = cols;
     mat->data = PUSH_ARRAY(arena, f32, rows * cols);
     return mat;
-}    
+} 
 
-void mat_clear(matrix* mat){
-    memset(mat->data, 0, sizeof(f32) * mat->rows * mat->cols);
+matrix* mat_load(mem_arena* arena, u32 rows, u32 cols, const char* filename) {
+    matrix* mat = mat_create(arena, rows, cols);
+
+    FILE* f = fopen(filename, "rb");
+    if (!f) {
+        printf("Could not open %s\n", filename);
+        return NULL;
+    }
+
+    fseek(f, 0, SEEK_END);
+    u64 size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    size = MIN(size, sizeof(f32) * rows * cols);
+
+    fread(mat->data, 1, size, f);
+
+    fclose(f);
+
+    return mat;
 }
 
 b32 mat_copy(matrix* dest, matrix* src){
@@ -66,6 +113,12 @@ b32 mat_copy(matrix* dest, matrix* src){
     memcpy(dest->data, src->data, sizeof(f32) * dest->rows * dest->cols);
     return true;
 }
+
+void mat_clear(matrix* mat){
+    memset(mat->data, 0, sizeof(f32) * mat->rows * mat->cols);
+}
+
+
 
 void mat_fill(matrix* mat, f32 value){
     u64 size = mat->rows * mat->cols;
