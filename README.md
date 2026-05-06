@@ -85,5 +85,9 @@ This compiles all .c files and runs the program.
 ## 📜 License
 MIT License — feel free to use, modify, and share.
 
+--- 
+Inspired by
+https://www.youtube.com/@Magicalbat
+
 
 
